@@ -45,7 +45,7 @@ TypeScript · Vite · HTML5 Canvas · WebRTC ([Trystero](https://github.com/dmot
 
 ## Development
 
-Requires Node 22.13 or newer (`nvm use` picks it up from `.nvmrc`).
+Requires Node 22.13 or a later 22.x, Node 24, or Node 26 and newer (`nvm use` picks it up from `.nvmrc`).
 
 ```sh
 npm install
@@ -56,4 +56,8 @@ npm run typecheck     # tsc --noEmit
 npm run lint          # ESLint, including type-aware rules
 npm run format        # format every file with Prettier
 npm run format:check  # check formatting without changing files
+npm test              # run the unit tests once
+npm run test:watch    # rerun tests on every change
 ```
+
+Unit tests sit next to the code as `src/**/*.test.ts`. Files named any other way aren't picked up.
