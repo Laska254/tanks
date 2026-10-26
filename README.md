@@ -42,3 +42,15 @@ If either of you disconnects or switches tabs, the game pauses until you're both
 ## Tech
 
 TypeScript · Vite · HTML5 Canvas · WebRTC ([Trystero](https://github.com/dmotz/trystero)) · Vitest · GitHub Actions → GitHub Pages
+
+## Development
+
+Requires Node 22.12 or newer (`nvm use` picks it up from `.nvmrc`).
+
+```sh
+npm install
+npm run dev        # dev server with hot reload
+npm run build      # production build into dist/
+npm run preview    # serve dist/ at http://localhost:4173/tanks/
+npm run typecheck  # tsc --noEmit
+```
