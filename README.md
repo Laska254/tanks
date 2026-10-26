@@ -4,7 +4,7 @@
 
 > 🚧 **Status: early development.** Nothing is playable yet. Progress is tracked on the [project board](https://github.com/Laska254/tanks/projects) and in [milestones](https://github.com/Laska254/tanks/milestones).
 
-Tanks is a fan remake inspired by *Battle City* (Namco, 1985), known to many in Eastern Europe as *Tank 1990*. It keeps what made the original great (destructible brick walls, an eagle to protect, waves of enemy tanks, power-ups) and adds the one thing it never had: **co-op over the internet**.
+Tanks is a fan remake inspired by _Battle City_ (Namco, 1985), known to many in Eastern Europe as _Tank 1990_. It keeps what made the original great (destructible brick walls, an eagle to protect, waves of enemy tanks, power-ups) and adds the one thing it never had: **co-op over the internet**.
 
 - **Online 2-player co-op.** One player hosts and shares a link, and the other joins.
 - **Runs in the browser** on PC and phone. No install, no account.
@@ -27,17 +27,17 @@ If either of you disconnects or switches tabs, the game pauses until you're both
 - Pause, auto-pause when a player is away, and resume after a disconnect or page refresh
 - Connection-quality indicator, plus a debug overlay (`F3`) for testing
 
-**Later:** spectator mode with emoji reactions, *Tank 1990* extras (the boat and the gun power-ups), versus mode, and a Polish translation.
+**Later:** spectator mode with emoji reactions, _Tank 1990_ extras (the boat and the gun power-ups), versus mode, and a Polish translation.
 
 ## Controls (planned)
 
-| Action | Keyboard | Touch |
-|---|---|---|
-| Move | Arrows / WASD | D-pad (left side) |
-| Fire | Space / J | Fire button (right side) |
-| Give a life to your partner | R | Revive button (shown when available) |
-| Pause | P / Esc | Pause button |
-| Debug overlay | F3 | n/a |
+| Action                      | Keyboard      | Touch                                |
+| --------------------------- | ------------- | ------------------------------------ |
+| Move                        | Arrows / WASD | D-pad (left side)                    |
+| Fire                        | Space / J     | Fire button (right side)             |
+| Give a life to your partner | R             | Revive button (shown when available) |
+| Pause                       | P / Esc       | Pause button                         |
+| Debug overlay               | F3            | n/a                                  |
 
 ## Tech
 
@@ -53,4 +53,7 @@ npm run dev        # dev server with hot reload
 npm run build      # production build into dist/
 npm run preview    # serve dist/ at http://localhost:4173/tanks/
 npm run typecheck  # tsc --noEmit
+npm run lint       # ESLint, including type-aware rules
+npm run format     # format every file with Prettier
+npm run format:check  # check formatting without changing files
 ```
