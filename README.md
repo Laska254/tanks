@@ -45,15 +45,15 @@ TypeScript · Vite · HTML5 Canvas · WebRTC ([Trystero](https://github.com/dmot
 
 ## Development
 
-Requires Node 22.12 or newer (`nvm use` picks it up from `.nvmrc`).
+Requires Node 22.13 or newer (`nvm use` picks it up from `.nvmrc`).
 
 ```sh
 npm install
-npm run dev        # dev server with hot reload
-npm run build      # production build into dist/
-npm run preview    # serve dist/ at http://localhost:4173/tanks/
-npm run typecheck  # tsc --noEmit
-npm run lint       # ESLint, including type-aware rules
-npm run format     # format every file with Prettier
+npm run dev           # dev server with hot reload
+npm run build         # production build into dist/
+npm run preview       # serve dist/ at http://localhost:4173/tanks/
+npm run typecheck     # tsc --noEmit
+npm run lint          # ESLint, including type-aware rules
+npm run format        # format every file with Prettier
 npm run format:check  # check formatting without changing files
 ```
