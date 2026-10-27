@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { newRoomCode } from './room-code';
+import { newRoomCode } from '../../src/spike/room-code';
 
 describe('newRoomCode', () => {
   it('is 6 characters with no look-alikes', () => {

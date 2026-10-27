@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Json } from './transport';
-import { TrysteroTransport } from './trystero-transport';
+import type { Json } from '../../src/net/transport';
+import { TrysteroTransport } from '../../src/net/trystero-transport';
 
 type OnMessage = (message: Json, context: { peerId: string }) => void;
 type Callbacks = { onJoinError: (details: object) => void };

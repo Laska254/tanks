@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Json } from '../net/transport';
-import { parse } from './message';
+import type { Json } from '../../src/net/transport';
+import { parse } from '../../src/spike/message';
 
 describe('parse', () => {
   it('reads pos, ping and pong, dropping extra keys', () => {
