@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fixedStep, MAX_TICKS_PER_FRAME, startLoop } from './loop';
+import { fixedStep, MAX_TICKS_PER_FRAME, startLoop } from '../../src/app/loop';
 
 // Calls the frame callback at `fps` for `seconds` of fake time and counts ticks.
 function countTicks(fps: number, seconds: number): number {

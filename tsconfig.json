@@ -1,6 +1,6 @@
 {
   // Two programs, so Node types never reach browser code:
-  // tsconfig.app.json for src/, tsconfig.node.json for vite.config.ts.
+  // tsconfig.app.json for src/ and test/, tsconfig.node.json for vite.config.ts.
   // Both extend the shared options below.
   "compilerOptions": {
     "target": "ES2022",

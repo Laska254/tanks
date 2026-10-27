@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { nextInt, seedRng } from './rng';
-import { step } from './step';
-import { createWorld, type Direction, type Inputs, type World } from './world';
+import { nextInt, seedRng } from '../../src/sim/rng';
+import { step } from '../../src/sim/step';
+import type { Direction } from '../../src/sim/types/direction';
+import type { Inputs } from '../../src/sim/types/inputs';
+import type { World } from '../../src/sim/types/world';
+import { createWorld } from '../../src/sim/world';
 
 function testWorld(): World {
   const world = createWorld({

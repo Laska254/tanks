@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextInt, seedRng, type RngState } from './rng';
+import { nextInt, seedRng, type RngState } from '../../src/sim/rng';
 
 function draw(seed: number, count: number, bound: number): number[] {
   let state: RngState = seedRng(seed);
