@@ -1,10 +1,11 @@
 import { BUILD_HASH, BUILT_AT } from './build-info';
 import { PROTOCOL_VERSION } from './net/protocol-version';
+import { startSpike } from './spike/two-dots';
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (!app) throw new Error('#app element missing');
 
-app.innerHTML = '<h1>Tanks</h1>';
+startSpike(app);
 
 // Corner label, so any device can tell which build it's running.
 const build = document.createElement('div');

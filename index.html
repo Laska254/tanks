@@ -13,6 +13,20 @@
         color: #eee;
         font-family: system-ui, sans-serif;
       }
+      /* Networking spike (#8); goes when the game replaces it. */
+      .spike {
+        padding: 8px;
+      }
+      .spike canvas {
+        display: block;
+        width: min(100%, calc((100vh - 120px) * 256 / 240));
+        image-rendering: pixelated;
+        touch-action: none;
+        border: 1px solid #444;
+      }
+      .spike input {
+        width: min(60ch, 70vw);
+      }
       #build {
         position: fixed;
         right: 4px;
