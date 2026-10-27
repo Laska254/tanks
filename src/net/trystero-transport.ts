@@ -87,8 +87,12 @@ export class TrysteroTransport implements Transport {
     if (!connection) return null;
     try {
       return connectionPathFromStats(await connection.getStats());
-    } catch {
-      // getStats() throws once the connection has closed.
+    } catch (error) {
+      // getStats() throws InvalidStateError once the connection has closed.
+      // Anything else is unexpected, so log it.
+      if (!(error instanceof DOMException && error.name === 'InvalidStateError')) {
+        console.warn('Trystero getStats failed', error);
+      }
       return null;
     }
   }

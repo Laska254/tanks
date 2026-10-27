@@ -46,8 +46,9 @@ function formatRtt(rtt: number | null): string {
 }
 
 function formatPeer(peer: Peer): string {
-  if (peer.path === null) return `RTT ${formatRtt(peer.rtt)}`;
-  return `RTT ${formatRtt(peer.rtt)} via ${CONNECTION_PATH_LABELS[peer.path]}`;
+  const rtt = `RTT ${formatRtt(peer.rtt)}`;
+  if (peer.path === null) return rtt;
+  return `${rtt} via ${CONNECTION_PATH_LABELS[peer.path]}`;
 }
 
 export function startSpike(app: HTMLElement): void {
