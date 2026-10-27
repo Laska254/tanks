@@ -4,15 +4,19 @@ import type { Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 import { PROTOCOL_VERSION } from './src/net/protocol-version';
 
-// CI sets GITHUB_SHA. Locally, ask git. Both are cut to 7 characters so the
-// same commit always gets the same hash.
+const HASH_LENGTH = 7;
+
+// CI sets GITHUB_SHA. Locally, ask git. Both give the full hash, cut to the
+// same length, so the same commit always gets the same short hash.
 function commitHash(): string {
-  if (env.GITHUB_SHA) return env.GITHUB_SHA.slice(0, 7);
   try {
-    return execSync('git rev-parse --short=7 HEAD', {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
+    const full =
+      env.GITHUB_SHA ||
+      execSync('git rev-parse HEAD', {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim();
+    return full.slice(0, HASH_LENGTH);
   } catch {
     return 'dev';
   }
