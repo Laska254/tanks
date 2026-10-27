@@ -80,6 +80,7 @@ export interface NewWorld {
   seed: number;
   stage: number;
   terrain: Terrain;
+  // Each stage file places its own base (DESIGN.md §4), so it isn't a constant.
   base: { x: number; y: number };
 }
 
