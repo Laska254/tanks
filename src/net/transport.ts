@@ -1,3 +1,5 @@
+import type { ConnectionPath } from './connection-path';
+
 // Anything JSON can carry. Every message goes over the wire as plain JSON.
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
@@ -18,4 +20,6 @@ export interface Transport {
   onMessage(cb: (message: Json, from: PeerId) => void): Unsubscribe;
   onPeerJoin(cb: (peer: PeerId) => void): Unsubscribe;
   onPeerLeave(cb: (peer: PeerId) => void): Unsubscribe;
+  // Null while it isn't known yet, or when the peer isn't connected.
+  connectionPath(peer: PeerId): Promise<ConnectionPath | null>;
 }

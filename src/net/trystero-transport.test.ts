@@ -4,6 +4,7 @@ import { TrysteroTransport } from './trystero-transport';
 
 type OnMessage = (message: Json, context: { peerId: string }) => void;
 type Callbacks = { onJoinError: (details: object) => void };
+type FakeConnection = { getStats: ReturnType<typeof vi.fn> };
 
 // Stands in for the room Trystero would create, so tests can fire its events
 // and see what the adapter sends.
@@ -16,6 +17,8 @@ type FakeRoom = {
   onMessage: OnMessage;
   send: ReturnType<typeof vi.fn>;
   leave: ReturnType<typeof vi.fn>;
+  connections: Record<string, FakeConnection>;
+  getPeers: () => Record<string, FakeConnection>;
   makeAction: (name: string, config: { onMessage: OnMessage }) => { send: FakeRoom['send'] };
 };
 
@@ -33,6 +36,8 @@ vi.mock('trystero', () => ({
       onMessage: () => {},
       send: vi.fn(() => Promise.resolve()),
       leave: vi.fn(() => Promise.resolve()),
+      connections: {},
+      getPeers: () => room.connections,
       makeAction: (_, { onMessage }) => {
         room.onMessage = onMessage;
         return { send: room.send };
@@ -169,6 +174,41 @@ describe('TrysteroTransport', () => {
     old.onPeerLeave?.('p2');
 
     expect(cb).not.toHaveBeenCalled();
+  });
+
+  it("reads a peer's connection path from its stats", async () => {
+    transport.join('ABCDE');
+    const stats = new Map<string, unknown>([
+      ['T', { type: 'transport', selectedCandidatePairId: 'CP' }],
+      ['CP', { type: 'candidate-pair', localCandidateId: 'L', remoteCandidateId: 'R' }],
+      ['L', { type: 'local-candidate', candidateType: 'host' }],
+      ['R', { type: 'remote-candidate', candidateType: 'srflx' }],
+    ]);
+    room().connections.p2 = { getStats: vi.fn(() => Promise.resolve(stats)) };
+
+    await expect(transport.connectionPath('p2')).resolves.toBe('stun');
+  });
+
+  it('gives no connection path for an unknown peer, outside a room, or a closed connection', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await expect(transport.connectionPath('p2')).resolves.toBeNull();
+    transport.join('ABCDE');
+    await expect(transport.connectionPath('p2')).resolves.toBeNull();
+
+    room().connections.p2 = {
+      getStats: vi.fn(() => Promise.reject(new DOMException('closed', 'InvalidStateError'))),
+    };
+    await expect(transport.connectionPath('p2')).resolves.toBeNull();
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('logs a getStats failure other than a closed connection', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    transport.join('ABCDE');
+    room().connections.p2 = { getStats: vi.fn(() => Promise.reject(new Error('quirk'))) };
+
+    await expect(transport.connectionPath('p2')).resolves.toBeNull();
+    expect(warn).toHaveBeenCalledWith('Trystero getStats failed', new Error('quirk'));
   });
 
   it('does nothing when leaving without a room', async () => {
