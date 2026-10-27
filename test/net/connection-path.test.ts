@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { connectionPathFromStats, type ConnectionPath } from './connection-path';
+import { connectionPathFromStats, type ConnectionPath } from '../../src/net/connection-path';
 
 // A getStats() report the way Chrome and Safari shape it: the transport entry
 // names the selected pair.

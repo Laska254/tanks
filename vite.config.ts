@@ -49,9 +49,8 @@ export default defineConfig({
   },
   plugins: [versionJson()],
   test: {
-    // Tests go in test/, next to src/ and mirroring its layout. Older ones
-    // still sit next to their code in src/ until #84 moves them.
-    include: ['test/**/*.test.ts', 'src/**/*.test.ts'],
+    // Tests go in test/, next to src/ and mirroring its layout.
+    include: ['test/**/*.test.ts'],
     // The simulation has no DOM, so tests don't get one by default.
     environment: 'node',
   },
