@@ -1,7 +1,8 @@
 // Networking spike (#8): every device in a room moves a dot and sees the others.
 // Throwaway; the real game replaces this page.
-import type { Json, PeerId } from '../net/transport';
+import type { PeerId } from '../net/transport';
 import { TrysteroTransport } from '../net/trystero-transport';
+import { parse } from './message';
 import { newRoomCode } from './room-code';
 
 const WIDTH = 256;
@@ -12,6 +13,9 @@ const SPEED = 90;
 // About 20 position updates per second.
 const SEND_INTERVAL_MS = 50;
 const PING_INTERVAL_MS = 1000;
+// Longest frame step, so a tab coming back from the background doesn't jump the dot.
+const MAX_FRAME_MS = 100;
+const BACKGROUND_COLOR = '#000';
 const SELF_COLOR = '#f5c542';
 const PEER_COLORS = ['#4cd964', '#5ac8fa', '#ff6b6b', '#c38bff'];
 
@@ -28,20 +32,13 @@ const DIRECTIONS: Record<string, [number, number]> = {
 
 type Dot = { x: number; y: number };
 type Peer = { color: string; dot: Dot | null; rtt: number | null };
-type Message =
-  { t: 'pos'; x: number; y: number } | { t: 'ping'; at: number } | { t: 'pong'; at: number };
-
-// Peers are other people's browsers, so check every message's shape.
-function parse(message: Json): Message | null {
-  if (typeof message !== 'object' || message === null || Array.isArray(message)) return null;
-  const { t, x, y, at } = message;
-  if (t === 'pos' && typeof x === 'number' && typeof y === 'number') return { t, x, y };
-  if ((t === 'ping' || t === 'pong') && typeof at === 'number') return { t, at };
-  return null;
-}
-
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function formatRtt(rtt: number | null): string {
+  if (rtt === null) return '…';
+  return `${rtt} ms`;
 }
 
 export function startSpike(app: HTMLElement): void {
@@ -56,7 +53,8 @@ export function startSpike(app: HTMLElement): void {
   const status = app.querySelector<HTMLElement>('.spike-status')!;
   const canvas = app.querySelector('canvas')!;
 
-  const code = new URLSearchParams(location.search).get('room')?.trim();
+  // Codes are uppercase, but phones type lowercase into the address bar.
+  const code = new URLSearchParams(location.search).get('room')?.trim().toUpperCase();
   if (code) {
     join(code);
   } else {
@@ -79,14 +77,16 @@ export function startSpike(app: HTMLElement): void {
     let colorIndex = 0;
 
     function renderStatus(): void {
-      const rtts = [...peers.values()].map((peer) => (peer.rtt === null ? '…' : `${peer.rtt} ms`));
-      status.textContent =
-        `Room ${roomCode} · ${state} · peers: ${peers.size}` +
-        (rtts.length ? ` · RTT: ${rtts.join(', ')}` : '');
+      let text = `Room ${roomCode} · ${state} · peers: ${peers.size}`;
+      if (peers.size) {
+        text += ` · RTT: ${[...peers.values()].map((peer) => formatRtt(peer.rtt)).join(', ')}`;
+      }
+      status.textContent = text;
     }
 
     transport.onPeerJoin((peer) => {
-      const color = PEER_COLORS[colorIndex++ % PEER_COLORS.length]!;
+      const color = PEER_COLORS[colorIndex % PEER_COLORS.length]!;
+      colorIndex++;
       peers.set(peer, { color, dot: null, rtt: null });
       state = 'connected';
       renderStatus();
@@ -112,6 +112,10 @@ export function startSpike(app: HTMLElement): void {
     transport.join(roomCode);
     // Leave on close, so the other side sees "peer left" at once.
     addEventListener('pagehide', () => void transport.leave());
+    // Back from the back/forward cache, the room is already left: join it afresh.
+    addEventListener('pageshow', (event) => {
+      if (event.persisted) location.reload();
+    });
     renderStatus();
 
     setInterval(() => {
@@ -123,6 +127,8 @@ export function startSpike(app: HTMLElement): void {
 
     const held = new Set<string>();
     addEventListener('keydown', (event) => {
+      // Leave shortcuts like Ctrl+A and Ctrl+S to the browser.
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (!(event.code in DIRECTIONS)) return;
       held.add(event.code);
       event.preventDefault();
@@ -154,8 +160,7 @@ export function startSpike(app: HTMLElement): void {
 
     let last = performance.now();
     function frame(now: number): void {
-      // Capped, so a tab coming back from the background doesn't jump the dot.
-      const seconds = Math.min(now - last, 100) / 1000;
+      const seconds = Math.min(now - last, MAX_FRAME_MS) / 1000;
       last = now;
       let dx = 0;
       let dy = 0;
@@ -167,7 +172,7 @@ export function startSpike(app: HTMLElement): void {
       me.x = clamp(me.x + dx * SPEED * seconds, RADIUS, WIDTH - RADIUS);
       me.y = clamp(me.y + dy * SPEED * seconds, RADIUS, HEIGHT - RADIUS);
 
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = BACKGROUND_COLOR;
       ctx.fillRect(0, 0, WIDTH, HEIGHT);
       for (const peer of peers.values()) if (peer.dot) drawDot(peer.dot, peer.color);
       drawDot(me, SELF_COLOR);
