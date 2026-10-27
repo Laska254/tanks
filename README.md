@@ -52,7 +52,7 @@ npm install
 npm run dev           # dev server with hot reload
 npm run build         # production build into dist/
 npm run preview       # serve dist/ at http://localhost:4173/tanks/
-npm run typecheck     # tsc --noEmit
+npm run typecheck     # tsc -b (browser code and Vite config, checked separately)
 npm run lint          # ESLint, including type-aware rules
 npm run format        # format every file with Prettier
 npm run format:check  # check formatting without changing files
