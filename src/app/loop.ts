@@ -32,11 +32,17 @@ export function fixedStep(tick: () => void): (now: number) => void {
 // Drives `tick` from the browser's animation frames. Returns a stop function.
 export function startLoop(tick: () => void): () => void {
   const frame = fixedStep(tick);
+  // Checked after each frame, because `tick` itself may stop the loop (say on
+  // game over), and by then this frame's id has already fired.
+  let running = true;
   let id = 0;
   const onFrame = (now: number) => {
     frame(now);
-    id = requestAnimationFrame(onFrame);
+    if (running) id = requestAnimationFrame(onFrame);
   };
   id = requestAnimationFrame(onFrame);
-  return () => cancelAnimationFrame(id);
+  return () => {
+    running = false;
+    cancelAnimationFrame(id);
+  };
 }

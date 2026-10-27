@@ -13,6 +13,12 @@ function draw(seed: number, count: number, bound: number): number[] {
 }
 
 describe('nextInt', () => {
+  // Raw Mulberry32 outputs for seed 42: 2581720956, 1925393290, 3661312704.
+  // A change here would break every saved or recorded run.
+  it('matches canonical Mulberry32', () => {
+    expect(draw(42, 3, 1000)).toEqual([601, 448, 852]);
+  });
+
   it('gives the same sequence for the same seed', () => {
     expect(draw(42, 100, 1000)).toEqual(draw(42, 100, 1000));
   });

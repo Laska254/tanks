@@ -1,10 +1,20 @@
 import eslint from '@eslint/js';
 import prettier from 'eslint-config-prettier/flat';
 import { defineConfig } from 'eslint/config';
+import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 const TRYSTERO_ONLY_IN_ADAPTER =
   'Use the Transport interface. Only src/net/trystero-transport.ts imports Trystero.';
+
+// Every browser global, plus the ways around them (`globalThis.document`) and
+// the clock. The sim may still clone data and log while debugging.
+const SIM_ALLOWED_GLOBALS = new Set(['structuredClone', 'console']);
+const SIM_FORBIDDEN_GLOBALS = [
+  ...Object.keys(globals.browser).filter((name) => !SIM_ALLOWED_GLOBALS.has(name)),
+  'globalThis',
+  'Date',
+];
 
 export default defineConfig(
   { ignores: ['dist/'] },
@@ -52,27 +62,7 @@ export default defineConfig(
     rules: {
       'no-restricted-globals': [
         'error',
-        ...[
-          'window',
-          'document',
-          'navigator',
-          'location',
-          'localStorage',
-          'sessionStorage',
-          'fetch',
-          'WebSocket',
-          'RTCPeerConnection',
-          'BroadcastChannel',
-          'performance',
-          'Date',
-          'crypto',
-          'setTimeout',
-          'setInterval',
-          'clearTimeout',
-          'clearInterval',
-          'requestAnimationFrame',
-          'cancelAnimationFrame',
-        ].map((name) => ({
+        ...SIM_FORBIDDEN_GLOBALS.map((name) => ({
           name,
           message: 'src/sim/ is pure logic: pass time and inputs in through step().',
         })),
