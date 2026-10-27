@@ -45,6 +45,48 @@ export default defineConfig(
       ],
     },
   },
+  // The simulation is pure: the same world and inputs always give the same
+  // next world, on host and guest alike. So no browser, clock or randomness.
+  {
+    files: ['src/sim/**/*.ts'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        ...[
+          'window',
+          'document',
+          'navigator',
+          'location',
+          'localStorage',
+          'sessionStorage',
+          'fetch',
+          'WebSocket',
+          'RTCPeerConnection',
+          'BroadcastChannel',
+          'performance',
+          'Date',
+          'crypto',
+          'setTimeout',
+          'setInterval',
+          'clearTimeout',
+          'clearInterval',
+          'requestAnimationFrame',
+          'cancelAnimationFrame',
+        ].map((name) => ({
+          name,
+          message: 'src/sim/ is pure logic: pass time and inputs in through step().',
+        })),
+      ],
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'Math',
+          property: 'random',
+          message: 'Use the seeded PRNG in src/sim/rng.ts, so runs can be replayed.',
+        },
+      ],
+    },
+  },
   // Last, so it switches off every rule that would fight Prettier.
   prettier,
 );
