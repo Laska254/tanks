@@ -44,9 +44,13 @@ export interface PowerUp {
   y: number;
 }
 
+// The base sits in the same spot on every stage, so the world only tracks
+// whether it still stands. Bottom centre of the 26×26 grid of 8 px tiles
+// (DESIGN.md §4): the 16 px base fills columns 12–13 of the last two rows.
+const TILE = 8 * UNITS_PER_PIXEL;
+export const BASE_POSITION = { x: 12 * TILE, y: 24 * TILE } as const;
+
 export interface Base {
-  x: number;
-  y: number;
   destroyed: boolean;
 }
 
@@ -80,11 +84,9 @@ export interface NewWorld {
   seed: number;
   stage: number;
   terrain: Terrain;
-  // Each stage file places its own base (DESIGN.md §4), so it isn't a constant.
-  base: { x: number; y: number };
 }
 
-export function createWorld({ seed, stage, terrain, base }: NewWorld): World {
+export function createWorld({ seed, stage, terrain }: NewWorld): World {
   return {
     tick: 0,
     phase: 'playing',
@@ -97,7 +99,7 @@ export function createWorld({ seed, stage, terrain, base }: NewWorld): World {
     enemies: [],
     bullets: [],
     powerUps: [],
-    base: { ...base, destroyed: false },
+    base: { destroyed: false },
     rng: seedRng(seed),
   };
 }

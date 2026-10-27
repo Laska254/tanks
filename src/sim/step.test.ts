@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { nextInt, seedRng } from './rng';
 import { step } from './step';
-import { createWorld, UNITS_PER_PIXEL, type Direction, type Inputs, type World } from './world';
+import { createWorld, type Direction, type Inputs, type World } from './world';
 
 function testWorld(): World {
   const world = createWorld({
     seed: 1234,
     stage: 1,
     terrain: { width: 2, height: 2, tiles: ['empty', 'brick', 'steel', 'water'] },
-    base: { x: 0, y: 16 * UNITS_PER_PIXEL },
   });
   world.players[0].tank = { x: 0, y: 0, dir: 'up' };
   world.enemies.push({ x: 32, y: 48, dir: 'down' });
