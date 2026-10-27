@@ -61,3 +61,5 @@ npm run test:watch    # rerun tests on every change
 ```
 
 Unit tests sit next to the code as `src/**/*.test.ts`. Files named any other way aren't picked up.
+
+CI runs `typecheck`, `lint`, `format:check`, `test` and `build` on every pull request and every push to `main`. Run them locally before pushing.
