@@ -3,6 +3,9 @@ import prettier from 'eslint-config-prettier/flat';
 import { defineConfig } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
+const TRYSTERO_ONLY_IN_ADAPTER =
+  'Use the Transport interface. Only src/net/trystero-transport.ts imports Trystero.';
+
 export default defineConfig(
   { ignores: ['dist/'] },
   eslint.configs.recommended,
@@ -27,10 +30,17 @@ export default defineConfig(
           patterns: [
             {
               group: ['trystero', 'trystero/*', '@trystero-p2p/*'],
-              message:
-                'Use the Transport interface. Only src/net/trystero-transport.ts imports Trystero.',
+              message: TRYSTERO_ONLY_IN_ADAPTER,
             },
           ],
+        },
+      ],
+      // no-restricted-imports doesn't see dynamic import().
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportExpression[source.value=/^(trystero|@trystero-p2p)/]',
+          message: TRYSTERO_ONLY_IN_ADAPTER,
         },
       ],
     },

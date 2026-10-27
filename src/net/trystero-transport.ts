@@ -14,6 +14,17 @@ function subscribe<T>(listeners: Set<T>, cb: T): Unsubscribe {
   return () => listeners.delete(cb);
 }
 
+// Calls every listener, even when one throws, so a bug in one can't starve the rest.
+function emit<A extends unknown[]>(listeners: Set<(...args: A) => void>, ...args: A): void {
+  for (const cb of listeners) {
+    try {
+      cb(...args);
+    } catch (error) {
+      console.error('Transport listener failed', error);
+    }
+  }
+}
+
 // WebRTC data channels, with Trystero's default Nostr strategy for signaling.
 export class TrysteroTransport implements Transport {
   readonly selfId: PeerId = selfId;
@@ -27,11 +38,19 @@ export class TrysteroTransport implements Transport {
     const room = joinRoom({ appId: APP_ID }, roomId, {
       onJoinError: (details) => console.warn('Trystero join error', details),
     });
-    room.onPeerJoin = (peer) => this.joinListeners.forEach((cb) => cb(peer));
-    room.onPeerLeave = (peer) => this.leaveListeners.forEach((cb) => cb(peer));
+    // Trystero keeps delivering a room's events for a moment after leave().
+    // Drop them, so they never mix into a room joined straight after.
+    const isCurrent = () => this.joined?.room === room;
+    room.onPeerJoin = (peer) => {
+      if (isCurrent()) emit(this.joinListeners, peer);
+    };
+    room.onPeerLeave = (peer) => {
+      if (isCurrent()) emit(this.leaveListeners, peer);
+    };
     const action = room.makeAction<Json>(ACTION, {
-      onMessage: (message, { peerId }) =>
-        this.messageListeners.forEach((cb) => cb(message, peerId)),
+      onMessage: (message, { peerId }) => {
+        if (isCurrent()) emit(this.messageListeners, message, peerId);
+      },
     });
     this.joined = { room, action };
   }
@@ -44,7 +63,10 @@ export class TrysteroTransport implements Transport {
 
   send(message: Json, to?: PeerId): void {
     if (!this.joined) throw new Error('Not in a room');
-    void this.joined.action.send(message, { target: to ?? null });
+    // Rejects when a peer drops mid-send. peerLeave reports that, so just log it.
+    this.joined.action
+      .send(message, { target: to ?? null })
+      .catch((error: unknown) => console.warn('Trystero send failed', error));
   }
 
   onMessage(cb: (message: Json, from: PeerId) => void): Unsubscribe {
