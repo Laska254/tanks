@@ -1,5 +1,6 @@
 // The only file allowed to import Trystero (enforced in eslint.config.js).
 import { joinRoom, selfId, type MessageAction, type Room } from 'trystero';
+import { connectionPathFromStats, type ConnectionPath } from './connection-path';
 import type { Json, PeerId, Transport, Unsubscribe } from './transport';
 
 // Only peers with the same app ID can find each other.
@@ -79,5 +80,16 @@ export class TrysteroTransport implements Transport {
 
   onPeerLeave(cb: (peer: PeerId) => void): Unsubscribe {
     return subscribe(this.leaveListeners, cb);
+  }
+
+  async connectionPath(peer: PeerId): Promise<ConnectionPath | null> {
+    const connection = this.joined?.room.getPeers()[peer];
+    if (!connection) return null;
+    try {
+      return connectionPathFromStats(await connection.getStats());
+    } catch {
+      // getStats() throws once the connection has closed.
+      return null;
+    }
   }
 }

@@ -1,5 +1,7 @@
-// Networking spike (#8): every device in a room moves a dot and sees the others.
+// Networking spike (#8, #9): every device in a room moves a dot and sees the
+// others, with the RTT and connection path to each.
 // Throwaway; the real game replaces this page.
+import { CONNECTION_PATH_LABELS, type ConnectionPath } from '../net/connection-path';
 import type { PeerId } from '../net/transport';
 import { TrysteroTransport } from '../net/trystero-transport';
 import { parse } from './message';
@@ -13,6 +15,8 @@ const SPEED = 90;
 // About 20 position updates per second.
 const SEND_INTERVAL_MS = 50;
 const PING_INTERVAL_MS = 1000;
+// ICE can switch paths after connecting, so this keeps checking.
+const PATH_INTERVAL_MS = 2000;
 // Longest frame step, so a tab coming back from the background doesn't jump the dot.
 const MAX_FRAME_MS = 100;
 const BACKGROUND_COLOR = '#000';
@@ -31,7 +35,7 @@ const DIRECTIONS: Record<string, [number, number]> = {
 };
 
 type Dot = { x: number; y: number };
-type Peer = { color: string; dot: Dot | null; rtt: number | null };
+type Peer = { color: string; dot: Dot | null; rtt: number | null; path: ConnectionPath | null };
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -39,6 +43,11 @@ function clamp(value: number, min: number, max: number): number {
 function formatRtt(rtt: number | null): string {
   if (rtt === null) return '…';
   return `${rtt} ms`;
+}
+
+function formatPeer(peer: Peer): string {
+  if (peer.path === null) return `RTT ${formatRtt(peer.rtt)}`;
+  return `RTT ${formatRtt(peer.rtt)} via ${CONNECTION_PATH_LABELS[peer.path]}`;
 }
 
 export function startSpike(app: HTMLElement): void {
@@ -79,7 +88,7 @@ export function startSpike(app: HTMLElement): void {
     function renderStatus(): void {
       let text = `Room ${roomCode} · ${state} · peers: ${peers.size}`;
       if (peers.size) {
-        text += ` · RTT: ${[...peers.values()].map((peer) => formatRtt(peer.rtt)).join(', ')}`;
+        text += ` · ${[...peers.values()].map(formatPeer).join(' | ')}`;
       }
       status.textContent = text;
     }
@@ -87,7 +96,7 @@ export function startSpike(app: HTMLElement): void {
     transport.onPeerJoin((peer) => {
       const color = PEER_COLORS[colorIndex % PEER_COLORS.length]!;
       colorIndex++;
-      peers.set(peer, { color, dot: null, rtt: null });
+      peers.set(peer, { color, dot: null, rtt: null, path: null });
       state = 'connected';
       renderStatus();
     });
@@ -124,6 +133,16 @@ export function startSpike(app: HTMLElement): void {
     setInterval(() => {
       if (peers.size) transport.send({ t: 'ping', at: performance.now() });
     }, PING_INTERVAL_MS);
+    setInterval(() => {
+      for (const id of peers.keys()) {
+        void transport.connectionPath(id).then((path) => {
+          const peer = peers.get(id);
+          if (!peer) return;
+          peer.path = path;
+          renderStatus();
+        });
+      }
+    }, PATH_INTERVAL_MS);
 
     const held = new Set<string>();
     addEventListener('keydown', (event) => {
