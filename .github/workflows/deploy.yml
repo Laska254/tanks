@@ -8,10 +8,11 @@ on:
 permissions:
   contents: read
 
-# One deploy at a time. A newer push replaces a queued one, but never cancels
-# a deploy already running.
+# One run at a time per branch. A newer push replaces a queued one, but never
+# cancels a deploy already running. Only main can deploy (the github-pages
+# environment allows nothing else), so deploys still never overlap.
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
