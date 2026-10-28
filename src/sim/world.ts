@@ -1,4 +1,5 @@
 import { seedRng } from './rng';
+import { BASE_TILE } from './stage';
 import type { NewWorld, World } from './types/world';
 
 export const TICKS_PER_SECOND = 60;
@@ -7,10 +8,9 @@ export const TICKS_PER_SECOND = 60;
 // pixel. Speeds slower than a pixel per tick stay exact without fractions.
 export const UNITS_PER_PIXEL = 16;
 
-// Bottom centre of the 26×26 grid of 8 px tiles (DESIGN.md §4): the 16 px
-// base fills columns 12–13 of the last two rows, on every stage.
+// The 16 px base sits on the same 8 px tiles on every stage (DESIGN.md §4).
 const TILE = 8 * UNITS_PER_PIXEL;
-export const BASE_POSITION = { x: 12 * TILE, y: 24 * TILE } as const;
+export const BASE_POSITION = { x: BASE_TILE.x * TILE, y: BASE_TILE.y * TILE } as const;
 
 export function createWorld({ seed, stage, terrain }: NewWorld): World {
   return {
