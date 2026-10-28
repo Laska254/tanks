@@ -58,10 +58,14 @@ npm run format        # format every file with Prettier
 npm run format:check  # check formatting without changing files
 npm test              # run the unit tests once
 npm run test:watch    # rerun tests on every change
+npm run sprites       # regenerate public/sprites.png and src/render/sprites.json
+npm run sprites:check # fail if the committed sprite sheet is out of date
 ```
 
 Unit tests go in `test/`, mirroring the layout of `src/`, as `test/**/*.test.ts`. Files named any other way aren't picked up.
 
-CI runs `typecheck`, `lint`, `format:check`, `test` and `build` on every pull request and every push to `main`. Run them locally before pushing.
+CI runs `typecheck`, `lint`, `format:check`, `test`, `sprites:check` and `build` on every pull request and every push to `main`. Run them locally before pushing.
+
+Sprites are drawn in `scripts/gen-sprites.ts` as pixel-art strings, one palette character per pixel. After changing them, run `npm run sprites` and commit both generated files.
 
 Every push to `main` deploys to https://laska254.github.io/tanks/, but only once those checks pass. The live site is also the test site.
