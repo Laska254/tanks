@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { loadStages, STAGES } from '../../src/app/stages';
-  import { BASE_TILE, ENEMY_SPAWN_TILES, PLAYER_SPAWN_TILES, parseStage } from '../../src/sim/stage';
+import { BASE_TILE, ENEMY_SPAWN_TILES, PLAYER_SPAWN_TILES, parseStage } from '../../src/sim/stage';
 import type { Terrain } from '../../src/sim/types/terrain';
 import { file, grid, put } from '../sim/stage-file';
 
