@@ -1,0 +1,27 @@
+..........................
+..........................
+..BBBB..BB......BB..BBBB..
+..BBBB..BB......BB..BBBB..
+..BB....BB..TT..BB....BB..
+..BB....BB..TT..BB....BB..
+......SSBB..TT..BBSS......
+......SSBB..TT..BBSS......
+TTTT..................TTTT
+TTTT..................TTTT
+TTTT..BBBBWWWWWWBBBB..TTTT
+TTTT..BBBBWWWWWWBBBB..TTTT
+......BB..WWWWWW..BB......
+......BB..WWWWWW..BB......
+..BB..BB..........BB..BB..
+..BB..BB..........BB..BB..
+..BB......BBBBBB......BB..
+..BB......BBBBBB......BB..
+..BBBBBB..........BBBBBB..
+..BBBBBB..........BBBBBB..
+............SS............
+............SS............
+..BB..BB..........BB..BB..
+..BB..BB...BBBB...BB..BB..
+..BB..BB...B..B...BB..BB..
+..BB..BB...B..B...BB..BB..
+enemies: bbbbbbbbbfbbbbbbbfbb
