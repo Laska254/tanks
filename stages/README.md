@@ -48,3 +48,7 @@ So the last three lines of every map have the wall in the middle:
 ...........B..B...........
 ...........B..B...........
 ```
+
+## Paths to the base
+
+Every enemy and player spawn needs a path to the base wide enough for a 2×2 tank. Brick counts as open, since it can be shot away. Steel and water block. A sealed spawn fails the tests, and the error names the spawn's top-left tile, counted from 0: `{ x: 0, y: 0 }` is the top-left enemy spawn.

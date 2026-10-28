@@ -1,27 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { loadStages, STAGES } from '../../src/app/stages';
-import {
-  BASE_TILE,
-  ENEMY_SPAWN_TILES,
-  PLAYER_SPAWN_TILES,
-  parseStage,
-  STAGE_SIZE,
-} from '../../src/sim/stage';
+  import { BASE_TILE, ENEMY_SPAWN_TILES, PLAYER_SPAWN_TILES, parseStage } from '../../src/sim/stage';
 import type { Terrain } from '../../src/sim/types/terrain';
 import { file, grid, put } from '../sim/stage-file';
+
+const TANK_TILES = 2;
+const FOOTPRINT = Array.from({ length: TANK_TILES }, (_, i) => i);
 
 // Whether a 2×2-tile tank starting at `from` can drive onto the base. Tanks
 // turn on the tile grid, so every whole-tile position counts. Brick, the
 // base's wall included, can be shot away, so only steel and water block.
 function reachesBase(terrain: Terrain, from: { x: number; y: number }): boolean {
   const open = (x: number, y: number) =>
-    [0, 1].every((dy) =>
-      [0, 1].every((dx) => {
+    FOOTPRINT.every((dy) =>
+      FOOTPRINT.every((dx) => {
         const tile = terrain.tiles[(y + dy) * terrain.width + x + dx];
         return tile !== 'steel' && tile !== 'water';
       }),
     );
-  const max = STAGE_SIZE - 2;
+  const maxX = terrain.width - TANK_TILES;
+  const maxY = terrain.height - TANK_TILES;
   const seen = new Set([`${from.x},${from.y}`]);
   const queue = [from];
   for (const { x, y } of queue) {
@@ -33,7 +31,7 @@ function reachesBase(terrain: Terrain, from: { x: number; y: number }): boolean 
       { x, y: y - 1 },
     ]) {
       const key = `${next.x},${next.y}`;
-      if (next.x < 0 || next.y < 0 || next.x > max || next.y > max || seen.has(key)) continue;
+      if (next.x < 0 || next.y < 0 || next.x > maxX || next.y > maxY || seen.has(key)) continue;
       if (!open(next.x, next.y)) continue;
       seen.add(key);
       queue.push(next);
@@ -89,8 +87,10 @@ describe('the real stages', () => {
       expect(spawns.filter((spawn) => !reachesBase(stage.terrain, spawn))).toEqual([]);
     },
   );
+});
 
-  it('notices a spawn sealed off by steel', () => {
+describe('reachesBase', () => {
+  it.each(['S', 'W'])('notices a spawn sealed off by %s', (char) => {
     let rows = grid();
     for (const [x, y] of [
       [2, 0],
@@ -99,7 +99,7 @@ describe('the real stages', () => {
       [1, 2],
       [2, 2],
     ] as const) {
-      rows = put(rows, x, y, 'S');
+      rows = put(rows, x, y, char);
     }
     const { terrain } = parseStage(file(rows));
     expect(reachesBase(terrain, ENEMY_SPAWN_TILES[0])).toBe(false);
