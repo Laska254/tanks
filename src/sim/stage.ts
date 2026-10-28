@@ -22,14 +22,11 @@ export const PLAYER_SPAWN_TILES = [
 
 // The brick wall round the base: the row above it and a column on each side.
 const WALL_TILES = [
-  { x: 11, y: 23 },
-  { x: 12, y: 23 },
-  { x: 13, y: 23 },
-  { x: 14, y: 23 },
-  { x: 11, y: 24 },
-  { x: 14, y: 24 },
-  { x: 11, y: 25 },
-  { x: 14, y: 25 },
+  ...[-1, 0, 1, 2].map((dx) => ({ x: BASE_TILE.x + dx, y: BASE_TILE.y - 1 })),
+  ...[0, 1].flatMap((dy) => [
+    { x: BASE_TILE.x - 1, y: BASE_TILE.y + dy },
+    { x: BASE_TILE.x + 2, y: BASE_TILE.y + dy },
+  ]),
 ];
 
 const TILES = new Map<string, Tile>([
@@ -83,7 +80,8 @@ function fail(line: number, column: number, message: string): never {
 // Reads a stage file (stages/README.md). Throws on the first mistake, saying
 // where it is.
 export function parseStage(text: string): Stage {
-  const lines = text.split(/\r?\n/);
+  // Some Windows editors start the file with a byte order mark.
+  const lines = text.replace(/^\uFEFF/, '').split(/\r?\n/);
   while (lines.at(-1) === '') lines.pop();
 
   const grid = lines.slice(0, STAGE_SIZE);
@@ -130,7 +128,8 @@ export function parseStage(text: string): Stage {
     fail(waveLine, column, `expected ${WAVE_SIZE} enemies, found ${enemies.length}`);
   }
 
-  if (lines.length > waveLine) fail(waveLine + 1, 1, 'unexpected line after the enemies');
+  const extra = lines.findIndex((line, i) => i > STAGE_SIZE && line !== '');
+  if (extra !== -1) fail(extra + 1, 1, 'unexpected line after the enemies');
 
   return { terrain: { width: STAGE_SIZE, height: STAGE_SIZE, tiles }, enemies };
 }

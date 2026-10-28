@@ -1,17 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { loadStages, STAGES } from '../../src/app/stages';
-
-const EMPTY = '.'.repeat(26);
-const WALL_SIDES = '...........B..B...........';
-const GRID = [
-  ...Array<string>(23).fill(EMPTY),
-  '...........BBBB...........',
-  WALL_SIDES,
-  WALL_SIDES,
-];
+import { file, grid } from '../sim/stage-file';
 
 function stageFile(firstEnemy: string): string {
-  return [...GRID, `enemies: ${firstEnemy}${'b'.repeat(19)}`].join('\n');
+  return file(grid(), `enemies: ${firstEnemy}${'b'.repeat(19)}`);
 }
 
 describe('loadStages', () => {
@@ -25,7 +17,15 @@ describe('loadStages', () => {
 
   it('rejects a gap in the numbering', () => {
     const files = { '../../stages/01.txt': stageFile('b'), '../../stages/03.txt': stageFile('b') };
-    expect(() => loadStages(files)).toThrow('stages/02.txt is missing');
+    expect(() => loadStages(files)).toThrow('stages/02.txt is missing, found stages/03.txt');
+  });
+
+  it('rejects a file not named like 01.txt', () => {
+    const files = {
+      '../../stages/01.txt': stageFile('b'),
+      '../../stages/01-draft.txt': stageFile('b'),
+    };
+    expect(() => loadStages(files)).toThrow('stages/01-draft.txt: expected a name like 01.txt');
   });
 
   it('names the file in a parse error', () => {

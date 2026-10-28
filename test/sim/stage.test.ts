@@ -1,23 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseStage } from '../../src/sim/stage';
-
-const EMPTY = '.'.repeat(26);
-const WALL_TOP = '...........BBBB...........';
-const WALL_SIDES = '...........B..B...........';
-const WAVE = 'enemies: bbbbffffppppaaaabfpa';
-
-// An empty stage with only the base's wall.
-function grid(): string[] {
-  return [...Array<string>(23).fill(EMPTY), WALL_TOP, WALL_SIDES, WALL_SIDES];
-}
-
-function put(rows: string[], x: number, y: number, char: string): string[] {
-  return rows.map((row, i) => (i === y ? row.slice(0, x) + char + row.slice(x + 1) : row));
-}
-
-function file(rows = grid(), wave = WAVE): string {
-  return [...rows, wave, ''].join('\n');
-}
+import { EMPTY, file, grid, put, WAVE } from './stage-file';
 
 describe('parseStage', () => {
   it('reads every tile and the wave in order', () => {
@@ -48,7 +31,12 @@ describe('parseStage', () => {
     expect(parseStage(text)).toEqual(parseStage(file()));
   });
 
+  it('accepts a byte order mark', () => {
+    expect(parseStage(`\uFEFF${file()}`)).toEqual(parseStage(file()));
+  });
+
   it.each([
+    ['an empty file', '', 'line 1, column 1: expected 26 grid lines, found 0'],
     [
       'too few grid lines',
       file(grid().slice(1)),
@@ -129,6 +117,11 @@ describe('parseStage', () => {
       'a line after the wave',
       `${file()}b\n`,
       'line 28, column 1: unexpected line after the enemies',
+    ],
+    [
+      'a line after a blank line after the wave',
+      `${file()}\nb\n`,
+      'line 29, column 1: unexpected line after the enemies',
     ],
   ])('rejects %s', (_, text, message) => {
     expect(() => parseStage(text)).toThrow(message);
